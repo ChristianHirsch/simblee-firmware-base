@@ -1,4 +1,8 @@
 # Program Simblee from command line
+
+## Prerequisite
+Install Arduino and the Simblee libraries based on the [instructions](https://www.simblee.com/Simblee_Quickstart_Guide_v1.1.0.pdf)
+
 ```
 ~/.arduino15/packages/Simblee/hardware/Simblee/1.1.4/RFDLoader_linux /dev/ttyUSB0 *.ino.hex
 ```

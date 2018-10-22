@@ -10,7 +10,7 @@ CFLAGS=-c -g -Os -w -std=gnu11 -ffunction-sections -fdata-sections -fno-builtin 
 CPP=arm-none-eabi-g++
 CPPFLAGS=-c -g -Os -w -std=gnu++11 -ffunction-sections -fdata-sections -fno-rtti -fno-exceptions -fno-builtin -MMD -mcpu=cortex-m0 -DF_CPU=16000000 -DARDUINO=10802 -mthumb -D__Simblee__
 
-LDFLAGS=-Wl,--gc-sections --specs=nano.specs -mcpu=cortex-m0 -mthumb -D__Simblee__ -T$(SIMBLEE_DIR)/variants/Simblee/linker_scripts/gcc/Simblee.ld -Wl,--cref -L. -Wl,--warn-common -Wl,--warn-section-align -Wl,--start-group $(SIMBLEE_DIR)/variants/Simblee/libSimbleeSystem.a $(SIMBLEE_DIR)/variants/Simblee/libSimblee.a core.a -Wl,--end-group
+LDFLAGS=-Wl,--gc-sections --specs=nano.specs -mcpu=cortex-m0 -mthumb -D__Simblee__ -T$(SIMBLEE_DIR)/variants/Simblee/linker_scripts/gcc/Simblee.ld -Wl,--cref -L. -Wl,--warn-common -Wl,--warn-section-align -Wl,--start-group $(SIMBLEE_DIR)/variants/Simblee/libSimbleeSystem.a $(SIMBLEE_DIR)/variants/Simblee/libSimblee.a $(BUILD_DIR)/core.a -Wl,--end-group
 
 INCDIRS=-I./include -I$(SIMBLEE_DIR)/system/Simblee -I$(SIMBLEE_DIR)/system/CMSIS/CMSIS/Include
 
@@ -20,22 +20,22 @@ RFDLOADER=$(SIMBLEE_DIR)/RFDLoader_linux
 
 $(BUILD_DIR)/%.c.o: %.c
 	$(CC) $(CFLAGS) $(INCDIRS) -o $@ $<
-	$(AR) rcs core.a $@
+	$(AR) rcs $(BUILD_DIR)/core.a $@
 
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(CPP) $(CPPFLAGS) $(INCDIRS) -o $@ $<
-	$(AR) rcs core.a $@
+	$(AR) rcs $(BUILD_DIR)/core.a $@
 
-firmware.elf: $(OBJS)
+$(BUILD_DIR)/firmware.elf: $(OBJS)
 	$(CPP) $(LDFLAGS) -Wl,-Map,$@.map -o $@
 
-firmware.hex: firmware.elf
+$(BUILD_DIR)/firmware.hex: $(BUILD_DIR)/firmware.elf
 	$(OBJCOPY) -O ihex $< $@
 
-upload: firmware.hex
+upload: $(BUILD_DIR)/firmware.hex
 	$(RFDLOADER) /dev/ttyUSB0 $<
 
 .PHONY: clean
 
 clean:
-	rm -f $(BUILD_DIR)/$(SRC_DIRS)/*.[od] core.a firmware.elf firmware.hex firmware.elf.map
+	rm -f $(BUILD_DIR)/$(SRC_DIRS)/*.[od] $(BUILD_DIR)/core.a $(BUILD_DIR)/firmware.elf $(BUILD_DIR)/firmware.hex $(BUILD_DIR)/firmware.elf.map
